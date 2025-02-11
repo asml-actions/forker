@@ -95,11 +95,15 @@ async function changeUserPermissions(org, repo, user, permission) {
 exports.changeUserPermissions = changeUserPermissions;
 async function forkRepo(owner, repo, org) {
     try {
+	core.info(`Start Forking of the repo`);
         const res = await octokit.request('POST /repos/{owner}/{repo}/forks', {
             owner,
             repo,
             organization: org ? org : ''
         });
+
+	core.info(JSON.stringify(res));
+	
         // Forks requests are still 'Accepted' (202) if the repository already exists at the specified location
         // However, repositories with the same name but a different source are auto-incremented (eg. my-forked-repo-1)
         if (res.status === const_1.HTTP.ACCEPTED) {
@@ -120,6 +124,9 @@ async function forkRepo(owner, repo, org) {
             core.setFailed(`🚨 Insufficient permission to fork repository: ${err.message}`);
         }
         else {
+            core.info(`Received an error code: ${err.status} ${err.message}`);
+	    core.info(`Received an error code: ${err.stack}`);
+	    core.info(JSON.stringify(err));
             core.setFailed(`🚨 Failed to create fork of repository: ${repo}`);
         }
     }
